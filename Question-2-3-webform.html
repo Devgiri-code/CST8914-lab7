@@ -1,126 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accessible Web Form</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        label {
-            display: block;
-            margin-top: 10px;
-        }
-
-        input,
-        button {
-            display: block;
-            margin: 10px 0;
-            padding: 8px;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        button {
-            background-color: #006b3a;
-            color: white;
-            border: none;
-        }
-
-        button:hover {
-            background-color: #004d29;
-        }
-
-        .error {
+        .required {
             color: red;
         }
-
-        .success {
-            color: green;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        fieldset {
-            margin-bottom: 15px;
+        .errors {
+            color: red;
+            font-size: 0.9em;
         }
     </style>
 </head>
-
 <body>
-    <h1>Registration Form</h1>
+    <h1>Accessible Web Form</h1>
+    
+    <p>Please fill in the form below. Fields marked with <span class="required">*</span> are required.</p>
 
-    <form id="registerForm" aria-describedby="formInstructions">
-        <p id="formInstructions">Please fill in the form below. Fields marked with * are required.</p>
+    <form id="accessibleForm" novalidate>
+        <div class="form-group">
+            <label for="name">Full name <span class="required">*</span></label>
+            <input id="name" name="name" type="text" aria-required="true" />
+            <span id="error-name" class="errors" role="alert" aria-live="assertive"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email <span class="required">*</span></label>
+            <input id="email" name="email" type="email" aria-required="true" />
+            <span id="error-email" class="errors" role="alert" aria-live="assertive"></span>
+        </div>
 
         <fieldset>
-            <legend>Personal Information</legend>
-
-            <label for="name">Name * <span id="nameHint" class="hidden">Please enter your full name.</span></label>
-            <input type="text" id="name" name="name" aria-required="true" aria-describedby="nameHint" required>
-
-            <label for="email">Email * <span id="emailHint" class="hidden">Please enter a valid email address.</span></label>
-            <input type="email" id="email" name="email" aria-required="true" aria-describedby="emailHint" required>
-
-            <label for="password">Password * <span id="passwordHint" class="hidden">Password must be at least 8 characters.</span></label>
-            <input type="password" id="password" name="password" aria-required="true" aria-describedby="passwordHint" required>
+            <legend>Gender <span class="required">*</span></legend>
+            <div class="control">
+                <input id="gender_male" name="gender" type="radio" value="male" aria-required="true" />
+                <label for="gender_male">Male</label>
+            </div>
+            <div class="control">
+                <input id="gender_female" name="gender" type="radio" value="female" aria-required="true" />
+                <label for="gender_female">Female</label>
+            </div>
+            <span id="error-gender" class="errors" role="alert" aria-live="assertive"></span>
         </fieldset>
 
-        <button type="submit" aria-label="Register">Register</button>
+        <div class="form-group">
+            <label for="biography">Biography</label>
+            <textarea id="biography" name="biography" aria-describedby="bio-help"></textarea>
+            <span id="bio-help">Include examples on your skills in JavaScript.</span>
+        </div>
+
+        <button type="submit">Submit</button>
     </form>
 
-    <div id="errorMessages" class="error hidden" aria-live="assertive" role="alert"></div>
-
-    <div id="successMessage" class="success hidden" aria-live="polite" role="alert">
-        All inputs are valid. Form submitted successfully!
-    </div>
+    <div id="formResult" aria-live="polite" role="alert"></div>
 
     <script>
-        document.getElementById('registerForm').addEventListener('submit', function (event) {
+        const form = document.getElementById('accessibleForm');
+        const result = document.getElementById('formResult');
+
+        form.addEventListener('submit', function(event) {
             event.preventDefault();
 
-            let errors = [];
-            let name = document.getElementById('name');
-            let email = document.getElementById('email');
-            let password = document.getElementById('password');
-            let errorMessages = document.getElementById('errorMessages');
-            let successMessage = document.getElementById('successMessage');
+            document.querySelectorAll('.errors').forEach(span => {
+                span.textContent = '';
+            });
 
-            errorMessages.innerHTML = '';
-            errorMessages.classList.add('hidden');
-            successMessage.classList.add('hidden');
+            let isValid = true;
 
-            if (name.value.trim() === '') {
-                errors.push('Name is required.');
-                document.getElementById('nameHint').classList.remove('hidden');
+            const nameInput = document.getElementById('name');
+            if (nameInput.value.trim() === '') {
+                isValid = false;
+                document.getElementById('error-name').textContent = 'Please enter your name.';
+                nameInput.focus();
             }
 
-            if (email.value.trim() === '' || !email.value.includes('@')) {
-                errors.push('Valid email is required.');
-                document.getElementById('emailHint').classList.remove('hidden');
+            const emailInput = document.getElementById('email');
+            if (emailInput.value.trim() === '') {
+                isValid = false;
+                document.getElementById('error-email').textContent = 'Please enter your email.';
+                emailInput.focus();
             }
 
-            if (password.value.length < 8) {
-                errors.push('Password must be at least 8 characters.');
-                document.getElementById('passwordHint').classList.remove('hidden');
+            const genderInputs = document.getElementsByName('gender');
+            let genderSelected = false;
+            for (let i = 0; i < genderInputs.length; i++) {
+                if (genderInputs[i].checked) {
+                    genderSelected = true;
+                    break;
+                }
+            }
+            if (!genderSelected) {
+                isValid = false;
+                document.getElementById('error-gender').textContent = 'Please select your gender.';
+                genderInputs[0].focus();
             }
 
-            if (errors.length > 0) {
-                errorMessages.innerHTML = errors.join('<br>');
-                errorMessages.classList.remove('hidden');
-                errorMessages.focus(); 
+            if (isValid) {
+                result.textContent = 'Form submitted successfully!';
             } else {
-                successMessage.classList.remove('hidden');
-                successMessage.focus(); 
+                result.textContent = 'There are errors in the form. Please correct them and try again.';
             }
         });
     </script>
 </body>
-
 </html>
