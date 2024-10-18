@@ -46,33 +46,37 @@
         .hidden {
             display: none;
         }
+
+        fieldset {
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 
 <body>
     <h1>Registration Form</h1>
+
     <form id="registerForm" aria-describedby="formInstructions">
         <p id="formInstructions">Please fill in the form below. Fields marked with * are required.</p>
 
-        
-        <label for="name">Name *</label>
-        <input type="text" id="name" name="name" aria-required="true" aria-describedby="nameHint" required>
-        <span id="nameHint" class="hidden">Please enter your full name.</span>
+        <fieldset>
+            <legend>Personal Information</legend>
 
-        <label for="email">Email *</label>
-        <input type="email" id="email" name="email" aria-required="true" aria-describedby="emailHint" required>
-        <span id="emailHint" class="hidden">Please enter a valid email address.</span>
+            <label for="name">Name * <span id="nameHint" class="hidden">Please enter your full name.</span></label>
+            <input type="text" id="name" name="name" aria-required="true" aria-describedby="nameHint" required>
 
-        <label for="password">Password *</label>
-        <input type="password" id="password" name="password" aria-required="true" aria-describedby="passwordHint" required>
-        <span id="passwordHint" class="hidden">Password must be at least 8 characters.</span>
+            <label for="email">Email * <span id="emailHint" class="hidden">Please enter a valid email address.</span></label>
+            <input type="email" id="email" name="email" aria-required="true" aria-describedby="emailHint" required>
+
+            <label for="password">Password * <span id="passwordHint" class="hidden">Password must be at least 8 characters.</span></label>
+            <input type="password" id="password" name="password" aria-required="true" aria-describedby="passwordHint" required>
+        </fieldset>
 
         <button type="submit" aria-label="Register">Register</button>
     </form>
 
-    <div id="errorMessages" class="error hidden" aria-live="assertive" role="alert">
-       
-    </div>
+    <div id="errorMessages" class="error hidden" aria-live="assertive" role="alert"></div>
+
     <div id="successMessage" class="success hidden" aria-live="polite" role="alert">
         All inputs are valid. Form submitted successfully!
     </div>
@@ -80,6 +84,7 @@
     <script>
         document.getElementById('registerForm').addEventListener('submit', function (event) {
             event.preventDefault();
+
             let errors = [];
             let name = document.getElementById('name');
             let email = document.getElementById('email');
@@ -87,38 +92,32 @@
             let errorMessages = document.getElementById('errorMessages');
             let successMessage = document.getElementById('successMessage');
 
-         
             errorMessages.innerHTML = '';
             errorMessages.classList.add('hidden');
             successMessage.classList.add('hidden');
 
-           
             if (name.value.trim() === '') {
                 errors.push('Name is required.');
                 document.getElementById('nameHint').classList.remove('hidden');
             }
 
-    
             if (email.value.trim() === '' || !email.value.includes('@')) {
                 errors.push('Valid email is required.');
                 document.getElementById('emailHint').classList.remove('hidden');
             }
 
-           
             if (password.value.length < 8) {
                 errors.push('Password must be at least 8 characters.');
                 document.getElementById('passwordHint').classList.remove('hidden');
             }
 
             if (errors.length > 0) {
-              
                 errorMessages.innerHTML = errors.join('<br>');
                 errorMessages.classList.remove('hidden');
-                errorMessages.focus();
+                errorMessages.focus(); 
             } else {
-            
                 successMessage.classList.remove('hidden');
-                successMessage.focus();
+                successMessage.focus(); 
             }
         });
     </script>
